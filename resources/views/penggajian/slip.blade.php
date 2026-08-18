@@ -33,6 +33,28 @@
                     </tbody>
                     <tfoot><tr style="background:var(--gray-light)"><td style="font-weight:700;font-size:1rem">TOTAL</td><td style="text-align:right;font-weight:700;font-size:1rem;color:var(--success)">Rp {{ number_format($penggajian->total_diterima,0,',','.') }}</td></tr></tfoot>
                 </table>
+
+                <!-- Section Tanda Tangan - Courier New 10pt, 1 Spasi -->
+                <div style="font-family: 'Courier New', Courier, monospace; font-size: 10pt; line-height: 1.0; margin-top: 30px;">
+                    <table style="width: 100%; border: none; border-collapse: collapse;">
+                        <tr>
+                            <td style="width: 50%; text-align: center; border: none; font-family: 'Courier New', Courier, monospace; font-size: 10pt; line-height: 1.0; vertical-align: top;">
+                                <p style="margin: 0; padding: 0;">Penerima,</p>
+                                <div style="height: 50px;"></div>
+                                <p style="margin: 0; padding: 0; font-weight: bold;"><u>{{ $penggajian->karyawan->nama_lengkap ?? '....................' }}</u></p>
+                                <p style="margin: 0; padding: 0;">NIP. {{ $penggajian->karyawan->nip ?? '..................' }}</p>
+                            </td>
+                            <td style="width: 50%; text-align: center; border: none; font-family: 'Courier New', Courier, monospace; font-size: 10pt; line-height: 1.0; vertical-align: top;">
+                                <p style="margin: 0; padding: 0;">Balikpapan, {{ now()->translatedFormat('d F Y') }}</p>
+                                <p style="margin: 0; padding: 0; font-weight: bold;">Bendahara / HRD,</p>
+                                <div style="height: 50px;"></div>
+                                <p style="margin: 0; padding: 0; font-weight: bold;"><u>( .................... )</u></p>
+                                <p style="margin: 0; padding: 0;">NIP. ..................</p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
                 <div class="text-center no-print mt-3">
                     <button class="btn btn-custom btn-primary-custom" onclick="window.print()"><i class="bi bi-printer me-1"></i> Cetak Slip Gaji</button>
                     <a href="{{ route('penggajian.index') }}" class="btn btn-custom btn-outline-custom"><i class="bi bi-arrow-left me-1"></i> Kembali</a>
