@@ -1,4 +1,8 @@
 <?php
+// Suppress PHP 8.5 deprecation notices emitted by the framework on this runtime.
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
+
 
 $app = new Illuminate\Foundation\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
