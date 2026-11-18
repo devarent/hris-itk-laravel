@@ -86,3 +86,11 @@ Tabel utama: `jabatan`, `satuan_kerja`, `users`, `karyawan`, `absensi`, `pengaju
 ## Lisensi
 
 MIT.
+
+---
+
+## Project Governance
+
+[![CI](https://github.com/aryafatthurahman4-collab/hris-itk-laravel/actions/workflows/ci.yml/badge.svg)](https://github.com/aryafatthurahman4-collab/hris-itk-laravel/actions/workflows/ci.yml)
+
+[Contributing](CONTRIBUTING.md) | [Security Policy](SECURITY.md) | [Code of Conduct](CODE_OF_CONDUCT.md)
