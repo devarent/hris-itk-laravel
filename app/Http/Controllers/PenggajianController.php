@@ -86,18 +86,30 @@ class PenggajianController extends Controller
 
     public function konfirmasi(Penggajian $penggajian)
     {
+        if ($penggajian->status !== 'draft') {
+            return back()->with('error', 'Hanya penggajian berstatus draft yang dapat dikonfirmasi.');
+        }
+
         $penggajian->update(['status' => 'dikonfirmasi']);
         return back()->with('success', 'Penggajian dikonfirmasi.');
     }
 
     public function bayar(Penggajian $penggajian)
     {
+        if ($penggajian->status !== 'dikonfirmasi') {
+            return back()->with('error', 'Penggajian harus dikonfirmasi terlebih dahulu sebelum dibayar.');
+        }
+
         $penggajian->update(['status' => 'dibayar']);
         return back()->with('success', 'Penggajian ditandai sebagai dibayar.');
     }
 
     public function destroy(Penggajian $penggajian)
     {
+        if ($penggajian->status === 'dibayar') {
+            return back()->with('error', 'Data penggajian yang sudah dibayar tidak dapat dihapus.');
+        }
+
         $penggajian->detail()->delete();
         $penggajian->delete();
         return redirect()->route('penggajian.index')->with('success', 'Data penggajian berhasil dihapus.');

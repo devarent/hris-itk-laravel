@@ -43,10 +43,10 @@ class AbsensiController extends Controller
         $validated = $request->validate([
             'karyawan_id' => 'required|exists:karyawan,id',
             'tanggal' => 'required|date',
-            'jam_masuk' => 'nullable',
-            'jam_pulang' => 'nullable',
+            'jam_masuk' => 'nullable|regex:/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/',
+            'jam_pulang' => 'nullable|regex:/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/',
             'status' => 'required|in:hadir,terlambat,izin,sakit,cuti,dinas_luar,alfa',
-            'keterangan' => 'nullable',
+            'keterangan' => 'nullable|string|max:500',
         ]);
 
         Absensi::updateOrCreate(
@@ -66,10 +66,10 @@ class AbsensiController extends Controller
     public function update(Request $request, Absensi $absensi)
     {
         $validated = $request->validate([
-            'jam_masuk' => 'nullable',
-            'jam_pulang' => 'nullable',
+            'jam_masuk' => 'nullable|regex:/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/',
+            'jam_pulang' => 'nullable|regex:/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/',
             'status' => 'required|in:hadir,terlambat,izin,sakit,cuti,dinas_luar,alfa',
-            'keterangan' => 'nullable',
+            'keterangan' => 'nullable|string|max:500',
         ]);
 
         $validated['verified_by'] = Auth::id();
@@ -111,23 +111,39 @@ class AbsensiController extends Controller
         $bulan = $request->bulan ?? now()->format('m');
         $tahun = $request->tahun ?? now()->format('Y');
 
-        $karyawan = Karyawan::where('aktif', true)->get();
-        $rekap = [];
-        foreach ($karyawan as $k) {
-            $absensi = Absensi::where('karyawan_id', $k->id)
-                ->whereYear('tanggal', $tahun)->whereMonth('tanggal', $bulan)
-                ->get();
-            $rekap[] = [
-                'karyawan' => $k,
-                'hadir' => $absensi->whereIn('status', ['hadir', 'terlambat'])->count(),
-                'terlambat' => $absensi->where('status', 'terlambat')->count(),
-                'izin' => $absensi->where('status', 'izin')->count(),
-                'sakit' => $absensi->where('status', 'sakit')->count(),
-                'cuti' => $absensi->where('status', 'cuti')->count(),
-                'alfa' => $absensi->where('status', 'alfa')->count(),
-                'total' => $absensi->count(),
-            ];
-        }
+        // Satu query agregat untuk seluruh karyawan (menghindari N+1 query).
+        $ringkasan = Absensi::query()
+            ->selectRaw(
+                "karyawan_id,
+                 SUM(status IN ('hadir','terlambat')) AS hadir,
+                 SUM(status = 'terlambat') AS terlambat,
+                 SUM(status = 'izin') AS izin,
+                 SUM(status = 'sakit') AS sakit,
+                 SUM(status = 'cuti') AS cuti,
+                 SUM(status = 'alfa') AS alfa,
+                 COUNT(*) AS total"
+            )
+            ->whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $bulan)
+            ->groupBy('karyawan_id')
+            ->get()
+            ->keyBy('karyawan_id');
+
+        $rekap = Karyawan::where('aktif', true)->get()
+            ->map(function ($k) use ($ringkasan) {
+                $a = $ringkasan->get($k->id);
+                return [
+                    'karyawan' => $k,
+                    'hadir' => (int) ($a->hadir ?? 0),
+                    'terlambat' => (int) ($a->terlambat ?? 0),
+                    'izin' => (int) ($a->izin ?? 0),
+                    'sakit' => (int) ($a->sakit ?? 0),
+                    'cuti' => (int) ($a->cuti ?? 0),
+                    'alfa' => (int) ($a->alfa ?? 0),
+                    'total' => (int) ($a->total ?? 0),
+                ];
+            })
+            ->all();
 
         return view('absensi.rekap', compact('rekap', 'bulan', 'tahun'));
     }

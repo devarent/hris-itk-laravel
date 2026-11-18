@@ -45,7 +45,8 @@ class PengajuanIzinController extends Controller
             'jenis' => 'required|in:izin,sakit,cuti,dinas_luar',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'alasan' => 'required',
+            'alasan' => 'required|string|max:1000',
+            'lampiran' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         if (auth()->user()->isKaryawan()) {

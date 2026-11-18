@@ -30,12 +30,12 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev
 # Copy environment file
 RUN cp .env.example .env
 
-# Generate application key
-RUN php artisan key:generate
+# Generate application key and public storage symlink
+RUN php artisan key:generate && php artisan storage:link
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose port
 EXPOSE 9000

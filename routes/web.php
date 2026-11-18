@@ -19,7 +19,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/login', [AuthController::class, 'authenticate']);
+Route::post('/login', [AuthController::class, 'authenticate'])->middleware('throttle:5,1');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::fallback(function () {
