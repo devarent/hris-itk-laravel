@@ -1,237 +1,88 @@
-# HRIS ITK - Sistem Informasi Manajemen Karyawan
+# HRIS ITK — Sistem Informasi Manajemen Karyawan
 
-Aplikasi Web Manajemen Karyawan berbasis Laravel dengan fitur Import Excel, Absensi, Penilaian Kinerja, dan Perhitungan Gaji. Dilengkapi dengan antarmuka modern menggunakan Tailwind CSS dan Shadcn UI/UX dengan animasi yang halus.
+Aplikasi web manajemen SDM berbasis **Laravel 11** dengan fitur import Excel, absensi, pengajuan izin, penilaian kinerja, penggajian, dan laporan. Antarmuka memakai Tailwind CSS dengan komponen bergaya Shadcn.
 
-## 🚀 Fitur Utama
+## Fitur
 
-### Manajemen SDM Terintegrasi
-- **Autentikasi & Otorisasi** - Multi-role system (Admin, Atasan, Karyawan) dengan hak akses terkontrol
-- **Master Data** - Kelola Jabatan, Satuan Kerja, Karyawan, dan Komponen Gaji
-- **Import Excel** - Import data massal dari file Excel dengan validasi otomatis
-- **Absensi** - Pencatatan kehadiran, rekapitulasi, dan koreksi data
-- **Pengajuan Izin/Cuti** - Workflow approval untuk izin dan cuti
-- **Penugasan** - Beri tugas, pantau progres, dan evaluasi penyelesaian
-- **Penilaian Kinerja** - Sistem penilaian berbasis indikator dengan perhitungan otomatis
-- **Penggajian** - Perhitungan gaji otomatis dengan slip gaji digital
-- **Laporan** - Berbagai laporan manajerial untuk keputusan strategis
+- Autentikasi & role (`admin`, `atasan`, `karyawan`)
+- Master data: jabatan, satuan kerja, karyawan, komponen gaji
+- Import Excel: karyawan & absensi, dengan template unduh
+- Absensi harian, rekap, dan verifikasi
+- Pengajuan izin/cuti dengan alur persetujuan
+- Penugasan & penilaian kinerja
+- Penggajian: hitung otomatis, konfirmasi, bayar, slip gaji PDF
+- Laporan: ekspor Excel, PDF, Word, dan PPTX
 
-### Teknologi Modern
-- **Backend**: Laravel 10.x (PHP 8.1+)
-- **Frontend**: Tailwind CSS + Shadcn UI/UX
-- **Database**: MySQL/MariaDB
-- **Animations**: Alpine.js untuk interaktivitas dan animasi halus
-- **Excel Processing**: PhpSpreadsheet
-- **PDF Generation**: Laravel DOMPDF
+## Teknologi
 
-## 📋 Persyaratan Sistem
+| Komponen | Versi |
+| --- | --- |
+| PHP | 8.2+ |
+| Laravel | 11.x |
+| Database | MySQL / MariaDB |
+| Frontend | Blade + Tailwind CSS + Vite |
+| Excel | PhpSpreadsheet |
+| PDF | DOMPDF |
 
-### Local Development
-- PHP 8.1 atau lebih tinggi
-- Composer 2.x
-- Node.js 16+ dan NPM
-- MySQL 5.7+ / MariaDB 10.3+
-- Web Server (Laragon/XAMPP/Apache/Nginx)
-
-### Production (Jagoan Hosting)
-- PHP 8.1+ pada server
-- MySQL/MariaDB database
-- SSL Certificate (HTTPS)
-- Akses cPanel/SSH
-
-## 🛠️ Instalasi Local Development
+## Instalasi lokal
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/aryafatthurahman4-collab/hris-itk.git
-cd hris-itk
+git clone https://github.com/aryafatthurahman4-collab/hris-itk-laravel.git
+cd hris-itk-laravel
 
-# 2. Install PHP dependencies
 composer install
-
-# 3. Install Node dependencies
 npm install
 
-# 4. Copy environment file
 cp .env.example .env
-
-# 5. Generate application key
 php artisan key:generate
 
-# 6. Configure database di .env
-# DB_DATABASE=hris_db
-# DB_USERNAME=root
-# DB_PASSWORD=
-
-# 7. Jalankan migrasi database
+# Sesuaikan DB_DATABASE, DB_USERNAME, DB_PASSWORD di .env
 php artisan migrate
-
-# 8. Jalankan seeder (opsional - untuk data demo)
 php artisan db:seed
 
-# 9. Build assets frontend
 npm run build
-
-# 10. Jalankan development server
 php artisan serve
 ```
 
-## 👥 Akun Demo
+Aplikasi berjalan di `http://127.0.0.1:8000` (atau `http://hris-itk-ijk.test` bila memakai Laragon).
 
-| Role     | Email            | Password  |
-|----------|------------------|-----------|
-| Admin    | admin@hr.com     | password  |
-| Atasan   | atasan@hr.com    | password  |
-| Karyawan | karyawan@hr.com  | password  |
+## Akun demo (lokal)
 
-## 🎨 Antarmuka & UI/UX
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@hr.com` | `password` |
+| Atasan | `atasan@hr.com` | `password` |
+| Karyawan | `karyawan@hr.com` | `password` |
 
-### Shadcn UI Components
-- **Button** - Variants: default, secondary, destructive, outline, ghost, link
-- **Card** - Container dengan header, content, dan footer
-- **Input** - Form input dengan styling konsisten
-- **Badge** - Status indicators dengan berbagai warna
-- **Table** - Tabel responsif dengan styling modern
-- **Alert** - Notifikasi sukses, warning, dan error
-- **Modal** - Dialog dengan animasi smooth
-- **Dropdown** - Menu dropdown dengan animasi
-- **Tabs** - Tab navigation untuk konten terorganisir
+Akun ini dibuat oleh `Database\Seeders\UserSeeder`. **Ganti password sebelum digunakan di lingkungan publik.**
 
-### Animations
-- Fade in/out transitions
-- Slide animations (top, bottom, left, right)
-- Scale animations untuk modals
-- Smooth hover effects
-- Loading states dengan skeleton screens
-
-## 📊 Struktur Database
-
-### 12 Tabel Utama
-1. **jabatan** - Data jabatan dan level
-2. **satuan_kerja** - Unit/divisi organisasi
-3. **users** - Akun login dan role
-4. **karyawan** - Profil lengkap karyawan
-5. **absensi** - Catatan kehadiran harian
-6. **pengajuan_izin** - Permohonan izin/cuti
-7. **tugas_karyawan** - Data penugasan kerja
-8. **penilaian_kinerja** - Hasil evaluasi kinerja
-9. **komponen_gaji** - Komponen penghasilan dan potongan
-10. **penggajian** - Transaksi payroll per periode
-11. **detail_penggajian** - Rincian komponen gaji
-12. **import_logs** - Riwayat import Excel
-
-## 🚢 Deployment ke Jagoan Hosting
-
-Lihat panduan lengkap deployment di [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
-
-### Quick Deployment Steps
-1. Setup database via phpMyAdmin
-2. Upload files ke server (File Manager atau Git)
-3. Configure `.env` file
-4. Install dependencies: `composer install --no-dev`
-5. Build assets: `npm run build`
-6. Set permissions: `chmod -R 755 storage bootstrap/cache`
-7. Run migrations: `php artisan migrate --force`
-8. Clear and cache: `php artisan optimize`
-
-### Automated Deployment
-Gunakan script deployment otomatis:
-```bash
-chmod +x deploy.sh
-./deploy.sh
-```
-
-## 🔧 Konfigurasi
-
-### Environment Variables
-```env
-APP_NAME="HRIS ITK"
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://localhost:8000
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=hris_db
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-### Tailwind CSS Configuration
-File konfigurasi: `tailwind.config.js`
-- Custom color scheme (Shadcn UI)
-- Animation keyframes
-- Responsive breakpoints
-- Custom utilities
-
-## 📝 Development Commands
+## Perintah umum
 
 ```bash
-# Development
-php artisan serve              # Start development server
-npm run dev                    # Watch assets for changes
-
-# Database
-php artisan migrate            # Run migrations
-php artisan migrate:rollback    # Rollback last migration
-php artisan db:seed            # Run seeders
-php artisan migrate:fresh       # Fresh migration with seed
-
-# Cache & Optimization
-php artisan cache:clear        # Clear application cache
-php artisan config:cache       # Cache configuration
-php artisan route:cache        # Cache routes
-php artisan view:cache         # Cache views
-php artisan optimize           # Optimize for production
-
-# Testing
-php artisan test               # Run tests
-php artisan tinker             # Interactive REPL
+php artisan serve              # Jalankan server
+npm run dev                    # Watch aset frontend
+php artisan migrate            # Migrasi
+php artisan db:seed            # Isi data demo
+php artisan migrate:fresh --seed   # Reset + isi ulang database
+php artisan optimize:clear     # Bersihkan cache
+php artisan test               # Jalankan tes
 ```
 
-## 🔒 Keamanan
+## Catatan keamanan
 
-- Password hashing dengan Laravel bcrypt
-- CSRF protection pada semua form
-- SQL injection prevention dengan Eloquent ORM
-- XSS protection dengan Blade templating
-- Role-based access control (RBAC)
-- Input validation dan sanitization
+- File `.env`, `.env.production`, dan `bootstrap/cache/*.php` **tidak boleh** di-commit. Semuanya sudah ada di `.gitignore`.
+- Route `/install-db` hanya terdaftar saat `APP_ENV=local` dan `APP_DEBUG=true`. Gunakan `php artisan migrate:fresh --seed` di produksi, bukan route tersebut.
+- Jangan simpan passwordPlain di dalam skrip atau kode. Gunakan variabel lingkungan.
+- Sebelum deploy: `php artisan key:generate`, set `APP_ENV=production`, `APP_DEBUG=false`, lalu `php artisan optimize`.
 
-## 📈 Performance Optimization
+## Deployment
 
-- Database indexing pada kolom yang sering dicari
-- Query optimization dengan Eager Loading
-- Asset minification dan bundling dengan Vite
-- Route caching untuk production
-- View caching untuk rendering lebih cepat
-- Lazy loading untuk komponen yang berat
+Lihat [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) dan [DATABASE_SETUP_GUIDE.md](DATABASE_SETUP_GUIDE.md).
 
-## 🤝 Kontribusi
+## Struktur database
 
-1. Fork repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
+Tabel utama: `jabatan`, `satuan_kerja`, `users`, `karyawan`, `absensi`, `pengajuan_izin`, `tugas_karyawan`, `penilaian_kinerja`, `komponen_gaji`, `penggajian`, `detail_penggajian`, `import_logs`.
 
-## 📄 License
+## Lisensi
 
-Project ini dilisensikan under MIT License - lihat file LICENSE untuk detail
-
-## 📞 Support
-
-Untuk bantuan dan pertanyaan:
-- Documentation: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
-- Laravel Docs: https://laravel.com/docs
-- Tailwind CSS: https://tailwindcss.com/docs
-- Shadcn UI: https://ui.shadcn.com
-
-## 🎯 Roadmap
-
-- [ ] Mobile app (React Native)
-- [ ] Biometric integration untuk absensi
-- [ ] Advanced analytics dashboard
-- [ ] Email notifications system
-- [ ] Multi-language support
-- [ ] API untuk integrasi sistem lain
+MIT.

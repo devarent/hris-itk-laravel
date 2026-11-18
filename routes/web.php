@@ -91,11 +91,17 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-Route::get('/install-db', function() {
-    try {
-        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--seed' => true]);
-        return "Database migration and seeding completed successfully!";
-    } catch (\Exception $e) {
-        return "Error migrating database: " . $e->getMessage();
-    }
-});
+// Utility migrasi ONLY untuk lokal. Di produksi route ini tidak terdaftar (404).
+// Di lingkungan lokal, gunakan: php artisan migrate:fresh --seed
+if (app()->environment('local')) {
+    Route::get('/install-db', function () {
+        abort_unless(config('app.debug'), 404);
+
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--seed' => true]);
+            return "Database migration and seeding completed successfully!";
+        } catch (\Throwable $e) {
+            return response("Error migrating database: " . $e->getMessage(), 500);
+        }
+    })->name('install-db');
+}
