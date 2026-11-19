@@ -27,7 +27,7 @@ Aplikasi web manajemen SDM berbasis **Laravel 11** dengan fitur import Excel, ab
 ## Instalasi lokal
 
 ```bash
-git clone https://github.com/aryafatthurahman4-collab/hris-itk-laravel.git
+git clone https://github.com/devarent/hris-itk-laravel.git
 cd hris-itk-laravel
 
 composer install
@@ -91,7 +91,7 @@ MIT.
 
 ## Project Governance
 
-[![CI](https://github.com/aryafatthurahman4-collab/hris-itk-laravel/actions/workflows/ci.yml/badge.svg)](https://github.com/aryafatthurahman4-collab/hris-itk-laravel/actions/workflows/ci.yml)
+[![CI](https://github.com/devarent/hris-itk-laravel/actions/workflows/ci.yml/badge.svg)](https://github.com/devarent/hris-itk-laravel/actions/workflows/ci.yml)
 
 [Contributing](CONTRIBUTING.md) | [Security Policy](SECURITY.md) | [Code of Conduct](CODE_OF_CONDUCT.md)
 
