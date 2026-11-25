@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\Karyawan;
+use App\Services\AiRouterService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,7 +30,24 @@ class AbsensiController extends Controller
         $absensi = $query->latest()->paginate(30)->withQueryString();
         $karyawanList = Karyawan::where('aktif', true)->get();
 
-        return view('absensi.index', compact('absensi', 'karyawanList'));
+        $todayQuery = Absensi::whereDate('tanggal', today());
+        if ($user->isKaryawan()) {
+            $todayQuery->where('karyawan_id', $user->karyawan_id);
+        }
+        $todayRecords = $todayQuery->get();
+
+        $stats = [
+            'hadir' => $todayRecords->whereIn('status', ['hadir', 'terlambat'])->count(),
+            'terlambat' => $todayRecords->where('status', 'terlambat')->count(),
+            'izin_sakit' => $todayRecords->whereIn('status', ['izin', 'sakit', 'cuti'])->count(),
+            'total_riwayat' => $absensi->total(),
+        ];
+
+        $absensiHariIni = $user->isKaryawan() && $user->karyawan_id
+            ? Absensi::where('karyawan_id', $user->karyawan_id)->whereDate('tanggal', today())->first()
+            : null;
+
+        return view('absensi.index', compact('absensi', 'karyawanList', 'stats', 'absensiHariIni'));
     }
 
     public function create()
@@ -90,20 +108,49 @@ class AbsensiController extends Controller
         if (!$karyawan) return back()->with('error', 'Akun Anda tidak terhubung ke data karyawan.');
 
         $request->validate([
-            'status' => 'required|in:hadir,terlambat,izin,sakit',
-            'keterangan' => 'nullable',
+            'status' => 'nullable|in:hadir,terlambat,izin,sakit',
+            'aksi' => 'nullable|in:masuk,pulang',
+            'keterangan' => 'nullable|string|max:500',
         ]);
+
+        $existing = Absensi::where('karyawan_id', $karyawan->id)
+            ->whereDate('tanggal', today())
+            ->first();
+
+        if ($request->input('aksi') === 'pulang' || ($existing && $existing->jam_masuk && !$existing->jam_pulang && !$request->filled('status'))) {
+            if (!$existing) {
+                return back()->with('error', 'Anda belum melakukan check-in hari ini.');
+            }
+            if ($existing->jam_pulang) {
+                return back()->with('error', 'Anda sudah melakukan check-out hari ini.');
+            }
+
+            $existing->update([
+                'jam_pulang' => now()->format('H:i:s'),
+            ]);
+
+            return back()->with('success', 'Check-out (absen pulang) hari ini berhasil dicatat.');
+        }
+
+        if ($existing && $existing->jam_masuk) {
+            return back()->with('error', 'Anda sudah melakukan check-in hari ini.');
+        }
+
+        $status = $request->input('status', 'hadir');
+        if ($status === 'hadir' && now()->format('H:i') > '08:00') {
+            $status = 'terlambat';
+        }
 
         Absensi::updateOrCreate(
             ['karyawan_id' => $karyawan->id, 'tanggal' => today()],
             [
                 'jam_masuk' => now()->format('H:i:s'),
-                'status' => $request->status,
+                'status' => $status,
                 'keterangan' => $request->keterangan,
             ]
         );
 
-        return back()->with('success', 'Absensi hari ini berhasil dicatat.');
+        return back()->with('success', 'Check-in absensi hari ini berhasil dicatat.');
     }
 
     public function rekap(Request $request)
@@ -146,5 +193,44 @@ class AbsensiController extends Controller
             ->all();
 
         return view('absensi.rekap', compact('rekap', 'bulan', 'tahun'));
+    }
+
+    public function aiAssistant(Request $request, AiRouterService $aiRouter)
+    {
+        $result = null;
+        $prompt = $request->input('prompt', '');
+        $tier = $request->input('tier', 'auto');
+
+        if ($request->isMethod('post')) {
+            $validated = $request->validate([
+                'prompt' => 'required|string|max:2000',
+                'tier' => 'required|in:auto,hydrogen,neon,carbon,glm',
+            ]);
+
+            $todayStats = Absensi::whereDate('tanggal', today())
+                ->selectRaw("
+                    SUM(status = 'hadir') AS hadir,
+                    SUM(status = 'terlambat') AS terlambat,
+                    SUM(status IN ('izin','sakit','cuti')) AS izin_sakit,
+                    SUM(status = 'alfa') AS alfa,
+                    COUNT(*) AS total
+                ")
+                ->first();
+
+            $contextSummary = sprintf(
+                "Tanggal: %s | Hadir: %d | Terlambat: %d | Izin/Sakit/Cuti: %d | Alfa: %d | Total Tercatat: %d",
+                today()->format('Y-m-d'),
+                (int) ($todayStats->hadir ?? 0),
+                (int) ($todayStats->terlambat ?? 0),
+                (int) ($todayStats->izin_sakit ?? 0),
+                (int) ($todayStats->alfa ?? 0),
+                (int) ($todayStats->total ?? 0)
+            );
+
+            $forceTier = $validated['tier'] === 'auto' ? null : $validated['tier'];
+            $result = $aiRouter->ask($validated['prompt'], $contextSummary, $forceTier);
+        }
+
+        return view('absensi.ai-assistant', compact('result', 'prompt', 'tier'));
     }
 }

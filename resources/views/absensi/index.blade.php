@@ -9,14 +9,32 @@
     </div>
     <div class="flex items-center gap-2 flex-wrap">
         @if(Auth::user()->isKaryawan())
-        <form method="POST" action="{{ route('absensi.harian') }}" class="inline">
-            @csrf
-            <button type="submit" name="status" value="hadir" 
-                    class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm transition-all">
-                <i class="bi bi-check-circle-fill"></i>
-                <span>Absen Hadir Hari Ini</span>
-            </button>
-        </form>
+            @if(!$absensiHariIni || !$absensiHariIni->jam_masuk)
+            <form method="POST" action="{{ route('absensi.harian') }}" class="inline">
+                @csrf
+                <input type="hidden" name="aksi" value="masuk">
+                <button type="submit" name="status" value="hadir" 
+                        class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm transition-all">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Check-in Hadir</span>
+                </button>
+            </form>
+            @elseif(!$absensiHariIni->jam_pulang)
+            <form method="POST" action="{{ route('absensi.harian') }}" class="inline">
+                @csrf
+                <input type="hidden" name="aksi" value="pulang">
+                <button type="submit" 
+                        class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs shadow-sm transition-all">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Check-out Pulang</span>
+                </button>
+            </form>
+            @else
+            <span class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-gray-100 text-gray-600 font-semibold text-xs border border-gray-200">
+                <i class="bi bi-check2-all text-emerald-600"></i>
+                <span>Absensi Hari Ini Selesai</span>
+            </span>
+            @endif
         @endif
         @if(Auth::user()->isAdmin() || Auth::user()->isAtasan())
         <x-button variant="default" href="{{ route('absensi.create') }}">
@@ -27,7 +45,43 @@
             <i class="bi bi-table"></i>
             <span>Rekap Bulanan</span>
         </x-button>
+        <x-button variant="outline" href="{{ route('absensi.ai-assistant') }}">
+            <i class="bi bi-stars"></i>
+            <span>AI Asisten</span>
+        </x-button>
         @endif
+    </div>
+</div>
+
+<!-- Shadcn-style Summary Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="card p-4 bg-white border border-gray-200">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-gray-500">Hadir Hari Ini</span>
+            <span class="w-7 h-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs"><i class="bi bi-person-check-fill"></i></span>
+        </div>
+        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $stats['hadir'] ?? 0 }}</div>
+    </div>
+    <div class="card p-4 bg-white border border-gray-200">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-gray-500">Terlambat Hari Ini</span>
+            <span class="w-7 h-7 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center text-xs"><i class="bi bi-clock-history"></i></span>
+        </div>
+        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $stats['terlambat'] ?? 0 }}</div>
+    </div>
+    <div class="card p-4 bg-white border border-gray-200">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-gray-500">Izin / Sakit / Cuti</span>
+            <span class="w-7 h-7 rounded-md bg-sky-50 text-sky-600 flex items-center justify-center text-xs"><i class="bi bi-file-earmark-medical"></i></span>
+        </div>
+        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $stats['izin_sakit'] ?? 0 }}</div>
+    </div>
+    <div class="card p-4 bg-white border border-gray-200">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-gray-500">Total Riwayat</span>
+            <span class="w-7 h-7 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs"><i class="bi bi-calendar3"></i></span>
+        </div>
+        <div class="mt-2 text-2xl font-bold text-gray-900">{{ $stats['total_riwayat'] ?? $absensi->total() }}</div>
     </div>
 </div>
 

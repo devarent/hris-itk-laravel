@@ -39,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin,atasan'])->group(function () {
         Route::resource('karyawan', KaryawanController::class);
         Route::get('absensi/rekap', [AbsensiController::class, 'rekap'])->name('absensi.rekap');
+        Route::match(['get', 'post'], 'absensi/ai-assistant', [AbsensiController::class, 'aiAssistant'])->name('absensi.ai-assistant');
         Route::post('pengajuan-izin/{pengajuanIzin}/approve', [PengajuanIzinController::class, 'approve'])->name('pengajuan-izin.approve');
         Route::resource('tugas', TugasController::class)->except(['edit', 'update']);
         Route::post('tugas/{tugas}/status', [TugasController::class, 'updateStatus'])->name('tugas.update-status');
